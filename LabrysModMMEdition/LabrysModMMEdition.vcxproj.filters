@@ -18,11 +18,14 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\GConPC1024Mod\GConPC1024Mod\mod.cpp">
+    <ClCompile Include="emeraldset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="utils.cpp">
-      <Filter>Header Files</Filter>
+    <ClCompile Include="mod.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="asmutils.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -50,10 +53,19 @@
     <ClInclude Include="SA2Variables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Trampoline.h">
+    <ClInclude Include="MemAccess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UsercallFunctionHandler.h">
+    <ClInclude Include="ninja.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="njdef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="emeraldset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="asmutils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

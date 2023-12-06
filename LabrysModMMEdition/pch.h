@@ -9,5 +9,5 @@
 
 // add headers that you want to pre-compile here
 #include "SA2ModLoader.h"
-#include "Trampoline.h"
+
 #endif //PCH_H
