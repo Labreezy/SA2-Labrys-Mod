@@ -6,11 +6,24 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <map>
 
 int hookEntryPt = 0x7380BF;
 DWORD hookExit = hookEntryPt + 6;
-std::vector<int> setIDs;
+std::vector<int> setIDsGeneric;
+std::map<int, std::vector<int>*> stgSets({
+	{LevelIDs_AquaticMine, new std::vector<int>()},
+	{LevelIDs_DeathChamber, new std::vector<int>()},
+	{LevelIDs_DryLagoon, new std::vector<int>()},
+	{LevelIDs_EggQuarters, new std::vector<int>()},
+	{LevelIDs_MadSpace, new std::vector<int>()},
+	{LevelIDs_MeteorHerd, new std::vector<int>()},
+	{LevelIDs_SecurityHall, new std::vector<int>()},
+	{LevelIDs_WildCanyon, new std::vector<int>()}
+});
 DWORD current_id;
+int lastStage = -1;
+
 
 template<typename Iter, typename RandomGenerator>
 Iter choose_random(Iter start, Iter end, RandomGenerator &g) {
@@ -31,8 +44,8 @@ void __declspec(naked)hook1024() {
 	__asm {
 		pushad
 	}
-	if (setIDs.size() > 0) {
-		current_id = *choose_random(setIDs.begin(), setIDs.end());
+	if (setIDsGeneric.size() > 0) {
+		current_id = *choose_random(setIDsGeneric.begin(), setIDsGeneric.end());
 	}
 	__asm {
 		popad
@@ -42,7 +55,7 @@ void __declspec(naked)hook1024() {
 }
 
 void initSetHook() {
-	if (setIDs.size() > 0) {
+	if (setIDsGeneric.size() > 0) {
 		Hook((void*)hookEntryPt, hook1024, 6);
 	}
 }
@@ -50,9 +63,9 @@ void initSetHook() {
 void LoadSetsFromFile(std::string fpath) {
 	std::ifstream infile(fpath);
 	int id;
-	PrintDebug("Sets Loaded:");
+	PrintDebug("Sets Loaded from %s", fpath.c_str());
 	while (infile >> id) {
-		setIDs.push_back(id);
+		setIDsGeneric.push_back(id);
 		PrintDebug("%d", id);
 	}
 	infile.close();
