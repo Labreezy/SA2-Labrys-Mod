@@ -107,6 +107,9 @@
       <ImportLibrary />
       <AdditionalOptions>/NOIMPLIB  /NOEXP %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y "$(OutputPath)" "D:\SteamLibrary\steamapps\common\Sonic Adventure 2\mods\Lab Mod"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

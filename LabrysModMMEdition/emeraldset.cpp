@@ -44,8 +44,12 @@ void __declspec(naked)hook1024() {
 	__asm {
 		pushad
 	}
-	if (setIDsGeneric.size() > 0) {
+	if (setIDsGeneric.size() > 0 && NumDeathsRestarts == 0) {
 		current_id = *choose_random(setIDsGeneric.begin(), setIDsGeneric.end());
+		PrintDebug("Loading Set %d", current_id);
+	}
+	else {
+		PrintDebug("No set(s) loaded");
 	}
 	__asm {
 		popad
@@ -63,6 +67,10 @@ void initSetHook() {
 void LoadSetsFromFile(std::string fpath) {
 	std::ifstream infile(fpath);
 	int id;
+	if (!setIDsGeneric.empty()) {
+		PrintDebug("got rid of %d sets", setIDsGeneric.size());
+		setIDsGeneric.clear();
+	}
 	PrintDebug("Sets Loaded from %s", fpath.c_str());
 	while (infile >> id) {
 		setIDsGeneric.push_back(id);
