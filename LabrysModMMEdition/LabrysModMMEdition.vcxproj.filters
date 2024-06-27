@@ -27,6 +27,12 @@
     <ClCompile Include="asmutils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="debug-text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="timeutil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="magic.h">
@@ -66,6 +72,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="asmutils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debug-text.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mod.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="timeutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
