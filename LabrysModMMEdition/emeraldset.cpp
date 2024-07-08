@@ -8,7 +8,7 @@
 #include <sstream>
 
 int hookEntryPt = 0x7380BF;
-int resultsEntryPt = 0x451609;
+int resultsEntryPt = 0x43e80e;
 DWORD hookExit = hookEntryPt + 6;
 DWORD resultsSkipExit = resultsEntryPt + 5;
 DWORD noScoreExit = 0x451535;
@@ -31,6 +31,9 @@ Iter choose_random(Iter start, Iter end) {
 	static std::mt19937 gen(rd());
 	return choose_random(start, end, gen);
 }
+int chooseSet() {
+	return *choose_random(setIDs.begin(), setIDs.end());
+}
 double getIGT() {
 	double igt = TimerMinutes * 60.0 + TimerSeconds;
 	double centis = ceil(TimerFrames/60.0*100);
@@ -50,7 +53,7 @@ void __declspec(naked)hook1024() {
 		__asm {
 			pushad
 		}
-		current_id = *choose_random(setIDs.begin(), setIDs.end());
+		current_id = chooseSet();
 
 		__asm {
 			popad
@@ -80,14 +83,20 @@ void __declspec(naked)hookResultsScreen() {
 			logCurrentSet(current_id);
 		}
 		__asm {
-			mov byte ptr [run_start_const], 0
+			
 			popad
-			jmp noScoreExit
+			mov eax, 1
+			mov ecx, 0x1A558A4
+			mov [ecx], ax
+			jmp resultsSkipExit
 		}
 	}
 	__asm {
-		mov byte ptr [run_start_const], 0
+		
 		popad
+		mov eax,1
+		mov ecx,0x1A558A4
+		mov [ecx],ax
 		jmp resultsSkipExit
 	}
 }

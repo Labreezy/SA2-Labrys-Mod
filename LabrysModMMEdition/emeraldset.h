@@ -70,6 +70,7 @@ struct SearchEmeraldsGameManager {
 
 DataPointer(SearchEmeraldsGameManager*, EmeraldManager, 0x1AF014C);
 DataPointer(byte*, LevelComplete, 0x174B001);
+DataPointer(byte*, GoToNextStage, 0x1A558A4);
 void LoadSetsFromFile(std::string fpath);
 void initHooks();
 void initResultsSkipHook();
