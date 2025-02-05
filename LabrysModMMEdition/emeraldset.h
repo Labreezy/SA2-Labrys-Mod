@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 
+
 typedef unsigned char   undefined;
 
 typedef unsigned int    ImageBaseOffset32;
@@ -75,5 +76,9 @@ void LoadSetsFromFile(std::string fpath);
 void initHooks();
 void initResultsSkipHook();
 void StartTimeDB(std::string fpath);
+static bool selectWithReplacement;
+static bool shuffleSetOrder;
+static bool skipResults;
 static std::ofstream* ildb_outf = NULL;
 
+bool isSetFileModified(std::string set_fpath);

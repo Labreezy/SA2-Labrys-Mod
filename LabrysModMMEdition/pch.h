@@ -10,4 +10,5 @@
 // add headers that you want to pre-compile here
 #include "SA2ModLoader.h"
 #include "mod.h"
+#include "Inifile.hpp"
 #endif //PCH_H

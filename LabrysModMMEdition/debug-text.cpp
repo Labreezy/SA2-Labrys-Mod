@@ -23,7 +23,7 @@ void DisplayTimed_DebugMessage_OnFrames()
 	if (DebugMessageTimer && debugText != "")
 	{
 		SetDebugFontColor(0xFFBFBFBF);
-		DisplayDebugStringFormatted(NJM_LOCATION(25, 10), debugText.c_str());
+		DisplayDebugStringFormatted(NJM_LOCATION(1, 2), debugText.c_str());
 		SetDebugFontColor(0xFFBFBFBF);
 		DebugMessageTimer--;
 	}
