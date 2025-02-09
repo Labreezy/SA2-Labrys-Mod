@@ -19,6 +19,9 @@ int curr_set_idx = 0;
 std::filesystem::file_time_type last_setf_write;
 std::vector<int> setIDs;
 std::vector<int> setIDsremaining;
+static std::random_device rd;
+static std::mt19937 gen;
+
 int current_id = -1;
 
 bool isSetFileModified(std::string set_fpath) {
@@ -32,26 +35,25 @@ bool isSetFileModified(std::string set_fpath) {
 
 template<typename Iter, typename RandomGenerator>
 Iter choose_random(Iter start, Iter end, RandomGenerator &g) {
-	std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
-	std::advance(start, dis(g));
+	auto dist = std::distance(start, end);
+	PrintDebug("Distance: %d", dist);
+	std::uniform_int_distribution<> dis(0, setIDs.size() - 1);
+	PrintDebug("Bounds: %d %d", dis.a(), dis.b());
+	int n = dis(g);
+	PrintDebug("Random choice: %d", n);
+	std::advance(start, n);
 	return start;
 }
 
 template<typename Iter>
 Iter choose_random(Iter start, Iter end) {
-	static std::random_device rd;
-	static std::mt19937 gen(rd());
+	
+		
 	return choose_random(start, end, gen);
 }
 int chooseSet() {
-	if (shuffleSetOrder) {
+	
 		return *choose_random(setIDs.begin(), setIDs.end());
-	}
-	else {
-		int ret_id = setIDs[curr_set_idx];
-		
-		return ret_id;
-	}
 }
 
 double getIGT() {
@@ -134,6 +136,7 @@ void initHooks() {
 		Hook((void*)hookEntryPt, hook1024, 6);
 	}
 	Hook((void*)resultsEntryPt, hookResultsScreen, 5);
+	gen = std::mt19937(rd());
 }
 
 
@@ -155,5 +158,6 @@ void LoadSetsFromFile(std::string fpath) {
 		setIDsremaining.push_back(id);
 		PrintDebug("%d", id);	
 	}
+	
 	infile.close();
 }
