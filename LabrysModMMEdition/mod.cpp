@@ -14,8 +14,15 @@ extern "C" {
 		HelperFunctionsGlobal = helperFunctions;
 		std::string modpath(path);
 		const IniFile* config = new IniFile(modpath + "\\config.ini");
-		selectWithReplacement = config->getBool("shuffleSettings", "replacement", true);
-		shuffleSetOrder = config->getBool("shuffleSettings", "randomize", true);
+		selectWithoutReplacement = config->getBool("ShuffleSettings", "replacement", true);
+		if (selectWithoutReplacement) {
+			PrintDebug("Selecting with replacement");
+		}
+		else {
+			PrintDebug("Selecting without replacement");
+		}
+
+		shuffleSetOrder = config->getBool("ShuffleSettings", "randomize", true);
 		skipResults = config->getBool("general", "skipresults", true);
 		std::string dbfolder = modpath + "\\db";
 		CreateDirectoryA(dbfolder.c_str(), NULL); //getlasterror will return ERR_ALREADY_EXISTS if exists so we don't quite care
@@ -26,7 +33,7 @@ extern "C" {
 		
 		StartTimeDB(csvdbpath); //label by date, somehow
 		
-		initHooks();
+		initHooks(selectWithoutReplacement);
 		Init_DebugText();
 
 	}

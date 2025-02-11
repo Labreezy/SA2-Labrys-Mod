@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "emeraldset.h"
 #include "asmutils.h"
+#include "mod.h"
 #include <random>
 #include <iterator>
 #include <vector>
@@ -18,7 +19,7 @@ int curr_set_idx = 0;
 
 std::filesystem::file_time_type last_setf_write;
 std::vector<int> setIDs;
-std::vector<int> setIDsremaining;
+std::vector<int> setIDsCopy;
 static std::random_device rd;
 static std::mt19937 gen;
 
@@ -52,8 +53,21 @@ Iter choose_random(Iter start, Iter end) {
 	return choose_random(start, end, gen);
 }
 int chooseSet() {
+	int set_num = *choose_random(setIDs.begin(), setIDs.end());
+	if (!selectWithoutReplacement) {
+		PrintDebug("Selecting With Replacement");
+		return set_num;
+	}
+	else {
+		PrintDebug("Selecting Without Replacement");
+		setIDs.erase(std::remove(setIDs.begin(), setIDs.end(), set_num), setIDs.end());
+		if (setIDs.size() == 0) {
+			PrintDebug("List Exhausted, Reloading");
+			setIDs = setIDsCopy;
+		}
+	}
 	
-		return *choose_random(setIDs.begin(), setIDs.end());
+	return set_num;
 }
 
 double getIGT() {
@@ -131,12 +145,13 @@ void __declspec(naked)hookResultsScreen() {
 	}
 }
 
-void initHooks() {
+void initHooks(bool replacementSetting) {
 	if (setIDs.size() > 0) {
 		Hook((void*)hookEntryPt, hook1024, 6);
 	}
 	Hook((void*)resultsEntryPt, hookResultsScreen, 5);
 	gen = std::mt19937(rd());
+	selectWithoutReplacement = replacementSetting;
 }
 
 
@@ -151,11 +166,11 @@ void LoadSetsFromFile(std::string fpath) {
 	std::ifstream infile(fpath);
 	int id;
 	setIDs.clear();
-	setIDsremaining.clear();
+	setIDsCopy.clear();
 	PrintDebug("Sets Loaded:");
 	while (infile >> id) {
 		setIDs.push_back(id);
-		setIDsremaining.push_back(id);
+		setIDsCopy.push_back(id);
 		PrintDebug("%d", id);	
 	}
 	

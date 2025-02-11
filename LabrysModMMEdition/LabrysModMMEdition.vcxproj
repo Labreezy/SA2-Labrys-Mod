@@ -103,7 +103,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\yourt\source\repos\LabrysModMMEdition\sa2-mod-loader\mod-loader-common\ModLoaderCommon;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)sa2-mod-loader\mod-loader-common\ModLoaderCommon</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -117,7 +117,7 @@
       <AdditionalDependencies>$(SolutionDir)\bin\ModLoaderCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y $(OutputPath)*.dll "D:\SteamLibrary\steamapps\common\Sonic Adventure 2\mods\sa2-labmod"</Command>
+      <Command>xcopy /Y $(OutputPath)*.dll "C:\Program Files (x86)\Steam\steamapps\common\Sonic Adventure 2\mods\labmod"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
