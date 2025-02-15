@@ -53,21 +53,29 @@ Iter choose_random(Iter start, Iter end) {
 	return choose_random(start, end, gen);
 }
 int chooseSet() {
-	int set_num = *choose_random(setIDs.begin(), setIDs.end());
-	if (!selectWithoutReplacement) {
-		PrintDebug("Selecting With Replacement");
+	if (shuffleSetOrder) {
+		int set_num = *choose_random(setIDs.begin(), setIDs.end());
+		if (!selectWithoutReplacement) {
+			PrintDebug("Selecting With Replacement");
+		}
+		else {
+			PrintDebug("Selecting Without Replacement");
+			setIDs.erase(std::remove(setIDs.begin(), setIDs.end(), set_num), setIDs.end());
+			if (setIDs.size() == 0) {
+				PrintDebug("List Exhausted, Reloading");
+				setIDs = setIDsCopy;
+			}
+		}
 		return set_num;
 	}
 	else {
-		PrintDebug("Selecting Without Replacement");
+		int set_num = setIDs.front();
 		setIDs.erase(std::remove(setIDs.begin(), setIDs.end(), set_num), setIDs.end());
 		if (setIDs.size() == 0) {
-			PrintDebug("List Exhausted, Reloading");
 			setIDs = setIDsCopy;
 		}
+		return set_num;
 	}
-	
-	return set_num;
 }
 
 double getIGT() {
