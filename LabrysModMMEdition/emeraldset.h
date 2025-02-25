@@ -54,7 +54,7 @@ struct SearchEmeraldsGameManager {
     struct Emerald duplicate_emerald_1;
     struct Emerald duplicate_emerald_2;
     struct Emerald piece_1;
-    struct Emerald pieec_2;
+    struct Emerald piece_2;
     struct Emerald piece_3;
     struct Emerald* slot_1_emeralds;
     struct Emerald* slot_2_emeralds;

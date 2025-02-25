@@ -23,7 +23,7 @@
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{96e9e387-a7cc-4bdb-9987-8451bafdec0e}</ProjectGuid>
     <RootNamespace>LabrysModMMEdition</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -85,6 +85,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>C:\Users\yourt\source\repos\LabrysModMMEdition\sa2-mod-loader\mod-loader-common\ModLoaderCommon;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -117,7 +118,7 @@
       <AdditionalDependencies>$(SolutionDir)\bin\ModLoaderCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y $(OutputPath)*.dll "D:\SteamLibrary\steamapps\common\Sonic Adventure 2\mods\sa2-labmod"</Command>
+      <Command>xcopy /Y $(SolutionDir)$(Configuration)\*l "D:\SteamLibrary\steamapps\common\Sonic Adventure 2\mods\sa2-labmod"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -165,6 +166,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="pieceutils.cpp" />
     <ClCompile Include="timeutil.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +179,7 @@
     <ClInclude Include="ninja.h" />
     <ClInclude Include="njdef.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="pieceutils.h" />
     <ClInclude Include="SA2Enums.h" />
     <ClInclude Include="SA2Functions.h" />
     <ClInclude Include="SA2ModInfo.h" />

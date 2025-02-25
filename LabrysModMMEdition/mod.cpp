@@ -1,6 +1,7 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 #include "emeraldset.h"
+#include "pieceutils.h"
 #include "debug-text.h"
 #include "IniFile.hpp"
 
@@ -8,12 +9,14 @@ std::string settxtpath;
 std::string csvdbpath;
 std::ofstream csvdb_f;
 HelperFunctions HelperFunctionsGlobal;
-
+bool DEATH_STRAT_MODE = false;
 extern "C" {
 	__declspec(dllexport) void __cdecl Init(const char* path, const HelperFunctions& helperFunctions) {
 		HelperFunctionsGlobal = helperFunctions;
 		std::string modpath(path);
 		const IniFile* config = new IniFile(modpath + "\\config.ini");
+		DEATH_STRAT_MODE = config->getBool("PostDeathSettings", "enabled", false);
+		
 		selectWithoutReplacement = config->getBool("ShuffleSettings", "replacement", true);
 		if (selectWithoutReplacement) {
 			PrintDebug("Selecting with replacement");
@@ -28,12 +31,18 @@ extern "C" {
 		CreateDirectoryA(dbfolder.c_str(), NULL); //getlasterror will return ERR_ALREADY_EXISTS if exists so we don't quite care
 		settxtpath = modpath + "\\sets.txt"; //make ini setting later
 		csvdbpath = dbfolder + "\\set_times.csv";
-		
-		LoadSetsFromFile(settxtpath);
-		
-		StartTimeDB(csvdbpath); //label by date, somehow
-		
-		initHooks(selectWithoutReplacement);
+		if (DEATH_STRAT_MODE) {
+			
+			std::string pieceGroup = config->getString("PostDeathSettings", "group");
+			initPostDeathHook(pieceGroup);
+		}
+		else {
+			LoadSetsFromFile(settxtpath);
+
+			StartTimeDB(csvdbpath); //label by date, somehow
+
+			initHooks(selectWithoutReplacement);
+		}
 		Init_DebugText();
 
 	}
@@ -44,11 +53,13 @@ extern "C" {
 			
 			ScoreP1 = (ScoreP1 - (ScoreP1 % 100)) + 42; //answers everything
 		}
-		if (isSetFileModified(settxtpath)) {
-			PrintDebug("SETS.TXT MODIFIED, RELOADING\n");
-			LoadSetsFromFile(settxtpath);
-			SendTimedDebugMessage("RELOADED SETS.TXT", 120);
+		if (!DEATH_STRAT_MODE){
+			if (isSetFileModified(settxtpath)) {
+				PrintDebug("SETS.TXT MODIFIED, RELOADING\n");
+				LoadSetsFromFile(settxtpath);
+				SendTimedDebugMessage("RELOADED SETS.TXT", 120);
 			
+			}
 		}
 		DisplayTimed_DebugMessage_OnFrames();
 		
