@@ -16,6 +16,7 @@ extern "C" {
 		std::string modpath(path);
 		const IniFile* config = new IniFile(modpath + "\\config.ini");
 		DEATH_STRAT_MODE = config->getBool("PostDeathSettings", "enabled", false);
+		wildCanyonOn = config->getBool("WCSettings", "enabled", false);
 		
 		selectWithoutReplacement = config->getBool("ShuffleSettings", "replacement", true);
 		if (selectWithoutReplacement) {
@@ -35,6 +36,16 @@ extern "C" {
 			
 			std::string pieceGroup = config->getString("PostDeathSettings", "group");
 			initPostDeathHook(pieceGroup);
+		}
+		else if (wildCanyonOn) {
+			wildCanyonLevel = config->getInt("WCSettings", "level", 1);
+			if (wildCanyonLevel > 4) {
+				wildCanyonLevel = 4;
+			}
+			if(wildCanyonLevel < 1) {
+				wildCanyonLevel = 1;
+			}
+			initPostDeathHook("");
 		}
 		else {
 			LoadSetsFromFile(settxtpath);
