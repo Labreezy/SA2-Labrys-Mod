@@ -96,30 +96,13 @@ void __declspec(naked)hookCustomSetGen() {
 	__asm {
 		pushad
 	}
-	if (CurrentLevel = LevelIDs_WildCanyon && wildCanyonOn) {
-		setPieceByID(WC_PIECE_ID); //sus ceiling exposed p1
-		int p2_idx = rand() % 10;
-		if (p2_idx < 4) {
-			setPieceByID(wcFreeP2s[p2_idx%2]); //20% of the time you'll get a free p2
-		}
-		int p3_idx = rand() % group_arr_len;
-		setPieceByID(group_arr[p3_idx]);
-		EmeraldManager->emeralds_spawned = 3;
-		__asm {
-			
-			popad
-			mov esi, [ebp + 8]
-			mov ecx, esi
-			jmp hookJmpBackPostP3
-		}
-	}
-	else if (CurrentLevel == LevelIDs_DeathChamber || CurrentLevel == LevelIDs_EggQuarters) {
+	 if (CurrentLevel == LevelIDs_DeathChamber || CurrentLevel == LevelIDs_EggQuarters) {
 	
 		
 		
 		if (CurrentLevel == LevelIDs_DeathChamber) {
 			setPieceByID(DC_PIECE_ID); //Water Bug
-			EmeraldManager->piece_1.id = -2; //pre-collect piece
+			EmeraldManager->piece_1.id = -2; //pre-collect piece	
 			
 
 			//give a guaranteed yellow ping on respawn
@@ -150,7 +133,6 @@ void __declspec(naked)hookCustomSetGen() {
 	else {
 		__asm {
 			popad
-			mov edi,[0x174b038]
 			jmp (hookEntryPtPostDeath + 6)
 		}
 
@@ -163,10 +145,6 @@ void initPostDeathHook(std::string piecegroup)
 	std::copy(eggQuartersYellowPingIds, eggQuartersYellowPingIds + 7, eggQuartersAllPingIds);
 	std::copy(eggQuartersGreenPingIds, eggQuartersGreenPingIds + 4, eggQuartersAllPingIds + 7);
 	eggQuartersAllPingIds[11] = 0x105; //First Place You Landed
-
-
-
-	if (!wildCanyonOn) {
 
 		if (piecegroup == "AllP2") {
 			group_arr = deathChamberAllPingIds;
@@ -181,25 +159,7 @@ void initPostDeathHook(std::string piecegroup)
 			group_arr_len = 5;
 		}
 
-	}
-	else {
-		group_arr_len = N_LEVEL_PIECES[wildCanyonLevel - 1];
-		group_arr = new int[group_arr_len];
-		if (wildCanyonLevel == 4) {
-			std::copy(wcLevel4FreePieces, wcLevel4FreePieces + 2, group_arr + (4 + 4 + 3));
-		}
-		if (wildCanyonLevel >= 3) {
-			std::copy(wcLevel3FreePieces, wcLevel3FreePieces + 3, group_arr + (4 + 4));
-		}
-		if (wildCanyonLevel >= 2) {
-			std::copy(wcLevel2FreePieces, wcLevel2FreePieces + 4, group_arr + 4);
-
-		}
-		if (wildCanyonLevel >= 1) {
-			std::copy(wcLevel1FreePieces, wcLevel1FreePieces + 4, group_arr);
-		}
-
-	}
+	
 
 
 

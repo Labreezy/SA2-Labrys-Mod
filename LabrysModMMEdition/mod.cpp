@@ -7,52 +7,64 @@
 
 std::string settxtpath;
 std::string csvdbpath;
+
 std::ofstream csvdb_f;
 HelperFunctions HelperFunctionsGlobal;
 bool DEATH_STRAT_MODE = false;
+bool minsets = false;
 extern "C" {
 	__declspec(dllexport) void __cdecl Init(const char* path, const HelperFunctions& helperFunctions) {
 		HelperFunctionsGlobal = helperFunctions;
 		std::string modpath(path);
 		const IniFile* config = new IniFile(modpath + "\\config.ini");
 		DEATH_STRAT_MODE = config->getBool("PostDeathSettings", "enabled", false);
-		wildCanyonOn = config->getBool("WCSettings", "enabled", false);
+		minsets = config->getBool("GeneralSettings", "minsets", false);
+		std::string safecolorstr = config->getString("GeneralSettings", "safecolor", "red");
 		
-		selectWithoutReplacement = config->getBool("ShuffleSettings", "replacement", true);
-		if (selectWithoutReplacement) {
-			PrintDebug("Selecting with replacement");
+		PrintDebug("SET %s SAFES", safecolorstr.c_str());
+		if (safecolorstr == "yellow") {
+			safeColorIndex = 1;
+		}
+		else if (safecolorstr == "red") {
+			safeColorIndex = 2;
 		}
 		else {
-			PrintDebug("Selecting without replacement");
+			safeColorIndex = 0;
 		}
 
-		shuffleSetOrder = config->getBool("ShuffleSettings", "randomize", true);
-		skipResults = config->getBool("general", "skipresults", true);
-		std::string dbfolder = modpath + "\\db";
-		CreateDirectoryA(dbfolder.c_str(), NULL); //getlasterror will return ERR_ALREADY_EXISTS if exists so we don't quite care
-		settxtpath = modpath + "\\sets.txt"; //make ini setting later
-		csvdbpath = dbfolder + "\\set_times.csv";
+		if (!DEATH_STRAT_MODE && !minsets) {
+			selectWithoutReplacement = config->getBool("ShuffleSettings", "replacement", true);
+			if (selectWithoutReplacement) {
+				PrintDebug("Selecting with replacement");
+			}
+			else {
+				PrintDebug("Selecting without replacement");
+			}
+
+			shuffleSetOrder = config->getBool("ShuffleSettings", "randomize", true);
+			PrintDebug("GOT ANOTHER THING");
+			//std::string dbfolder = modpath + "\\db";
+			//CreateDirectoryA(dbfolder.c_str(), NULL); //getlasterror will return ERR_ALREADY_EXISTS if exists so we don't quite care
+			settxtpath = modpath + "\\sets.txt"; //make ini setting later
+			//csvdbpath = dbfolder + "\\set_times.csv";
+		}
+
 		if (DEATH_STRAT_MODE) {
-			
+			PrintDebug("DEATH STRAT MODE ON");
 			std::string pieceGroup = config->getString("PostDeathSettings", "group");
 			initPostDeathHook(pieceGroup);
 		}
-		else if (wildCanyonOn) {
-			wildCanyonLevel = config->getInt("WCSettings", "level", 1);
-			if (wildCanyonLevel > 4) {
-				wildCanyonLevel = 4;
-			}
-			if(wildCanyonLevel < 1) {
-				wildCanyonLevel = 1;
-			}
-			initPostDeathHook("");
+		else if (minsets) {
+			PrintDebug("MINIMUM SET MODE ON");
+			initHooks(selectWithoutReplacement, minsets);
 		}
 		else {
+			PrintDebug("LOADING FROM FILE");
 			LoadSetsFromFile(settxtpath);
 
-			StartTimeDB(csvdbpath); //label by date, somehow
+			//StartTimeDB(csvdbpath); //label by date, somehow
 
-			initHooks(selectWithoutReplacement);
+			initHooks(selectWithoutReplacement, minsets);
 		}
 		Init_DebugText();
 
@@ -64,7 +76,7 @@ extern "C" {
 			
 			ScoreP1 = (ScoreP1 - (ScoreP1 % 100)) + 42; //answers everything
 		}
-		if (!DEATH_STRAT_MODE){
+		if (!DEATH_STRAT_MODE && !minsets){
 			if (isSetFileModified(settxtpath)) {
 				PrintDebug("SETS.TXT MODIFIED, RELOADING\n");
 				LoadSetsFromFile(settxtpath);

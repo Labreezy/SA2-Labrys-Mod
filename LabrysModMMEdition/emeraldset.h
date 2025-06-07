@@ -69,14 +69,17 @@ struct SearchEmeraldsGameManager {
 
 
 
+
 DataPointer(SearchEmeraldsGameManager*, EmeraldManager, 0x1AF014C);
 DataPointer(byte*, LevelComplete, 0x174B001);
 DataPointer(byte*, GoToNextStage, 0x1A558A4);
+DataPointer(char, CurrentSafeColor, 0x1AEDFD4);
+DataArray(char, SafeSwitchFlags, 0x1DE9461, 3);
 void LoadSetsFromFile(std::string fpath);
-void initHooks(bool withReplacement);
+void initHooks(bool withReplacement, bool useMin);
 void initResultsSkipHook();
 void StartTimeDB(std::string fpath);
-
 static std::ofstream* ildb_outf = NULL;
-
+static char safeColorIndex;
 bool isSetFileModified(std::string set_fpath);
+
