@@ -106,7 +106,6 @@ double getIGT() {
 void logCurrentSet(int setID) {
 	double igt = getIGT();
 	PrintDebug("%d,%d,%f", CurrentLevel, setID, igt);
-	*ildb_outf << CurrentLevel << "," << setID << "," << igt << std::endl;
 }
 
 int chooseSetFromMinLists() {
@@ -167,7 +166,7 @@ void __declspec(naked)hook1024() {
 			jmp hookExit
 		}
 	}
-	else {
+	else {	
 		__asm {
 			mov current_id, edi
 			jmp hookExit

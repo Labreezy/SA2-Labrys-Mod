@@ -3,7 +3,7 @@
 #include "emeraldset.h"
 #include "pieceutils.h"
 #include "debug-text.h"
-#include "IniFile.hpp"
+#include "./IniFile.hpp"
 
 std::string settxtpath;
 std::string csvdbpath;
