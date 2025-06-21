@@ -9,6 +9,7 @@ std::string settxtpath;
 std::string csvdbpath;
 
 std::ofstream csvdb_f;
+bool shuffleSetOrder = false;
 HelperFunctions HelperFunctionsGlobal;
 bool DEATH_STRAT_MODE = false;
 bool minsets = false;
@@ -19,8 +20,8 @@ extern "C" {
 		const IniFile* config = new IniFile(modpath + "\\config.ini");
 		DEATH_STRAT_MODE = config->getBool("PostDeathSettings", "enabled", false);
 		minsets = config->getBool("GeneralSettings", "minsets", false);
-		std::string safecolorstr = config->getString("GeneralSettings", "safecolor", "red");
-		
+		std::string safecolorstr = config->getString("GeneralSettings", "safecolor", "yellow");
+		shuffleSetOrder = config->getBool("ShuffleSettings", "randomize", true);
 		PrintDebug("SET %s SAFES", safecolorstr.c_str());
 		if (safecolorstr == "yellow") {
 			safeColorIndex = 1;
@@ -41,7 +42,7 @@ extern "C" {
 				PrintDebug("Selecting without replacement");
 			}
 
-			shuffleSetOrder = config->getBool("ShuffleSettings", "randomize", true);
+			
 			PrintDebug("GOT ANOTHER THING");
 			//std::string dbfolder = modpath + "\\db";
 			//CreateDirectoryA(dbfolder.c_str(), NULL); //getlasterror will return ERR_ALREADY_EXISTS if exists so we don't quite care
@@ -56,7 +57,7 @@ extern "C" {
 		}
 		else if (minsets) {
 			PrintDebug("MINIMUM SET MODE ON");
-			initHooks(selectWithoutReplacement, minsets);
+			initHooks(shuffleSetOrder, selectWithoutReplacement, minsets);
 		}
 		else {
 			PrintDebug("LOADING FROM FILE");
@@ -64,7 +65,7 @@ extern "C" {
 
 			//StartTimeDB(csvdbpath); //label by date, somehow
 
-			initHooks(selectWithoutReplacement, minsets);
+			initHooks(shuffleSetOrder, selectWithoutReplacement, minsets);
 		}
 		Init_DebugText();
 
@@ -74,7 +75,7 @@ extern "C" {
 		
 		if (GameState == GameStates_Ingame) {
 			
-			ScoreP1 = (ScoreP1 - (ScoreP1 % 100)) + 42; //answers everything
+			ScoreP1 = (ScoreP1 - (ScoreP1 % 10)) + 7; //RIP 42 but score attacks gotta see that number
 		}
 		if (!DEATH_STRAT_MODE && !minsets){
 			if (isSetFileModified(settxtpath)) {

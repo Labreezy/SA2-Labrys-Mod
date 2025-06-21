@@ -112,7 +112,7 @@ void __declspec(naked)hookCustomSetGen() {
 		}
 		else if (CurrentLevel == LevelIDs_EggQuarters) {
 			setPieceByID(EQ_PIECE_ID); //Holy Altar
-			EmeraldManager->piece_2.id = -2; //pre-collect
+			EmeraldManager->piece_1.id = -2; //pre-collect
 			int* pingread_arr = eggQuartersAllPingIds;
 			int pingread_arr_sz = 12;
 			int rand_idx = (rand() % pingread_arr_sz);

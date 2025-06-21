@@ -2,6 +2,7 @@
 #include "emeraldset.h"
 #include "asmutils.h"
 #include "mod.h"
+#include "debug-text.h"
 #include <random>
 #include <iterator>
 #include <vector>
@@ -21,11 +22,13 @@ int curr_set_idx = 0;
 bool hasSetSafes = false;
 int lastLevel = -1;
 bool useMinSets = false;
+bool shuffleSets = false;
 std::filesystem::file_time_type last_setf_write;
 std::vector<int> setIDs;
 std::vector<int> setIDsCopy;
 static std::random_device rd;
 static std::mt19937 gen;
+int safeSwitchArrayBase = 0x1DE9461;
 std::vector<int> min_sets_wc = { 174,785,258,783,959,774,563,395,413,70,87,183,842,809,722,341,798,1003,827,473,992,334,255,972,485,399,477,970,703,372,813,691,659,414,442,262,111,365,979 };
 std::vector<int> min_sets_ph = { 0,2,3,4,5,369,10,11,12,14,211,34,56,241,60,69,74,85,118,153,176,202,343,294,348,603,610,929,633,273,410,716,524,383,803,966,154,276,708 };
 std::vector<int> min_sets_am = { 248,1,2,3,5,6,7,12,17,902,22,23,222,40,41,47,51,52,78,106,115,131,154,179,213,492,563,408,589,428,168,439,546,254,1000,740,189 };
@@ -49,39 +52,34 @@ bool isSetFileModified(std::string set_fpath) {
 	return false;
 }
 
-template<typename Iter, typename RandomGenerator>
-Iter choose_random(Iter start, Iter end, RandomGenerator &g) {
-	auto dist = std::distance(start, end);
-	PrintDebug("Distance: %d", dist);
-	std::uniform_int_distribution<> dis(0, setIDs.size() - 1);
-	PrintDebug("Bounds: %d %d", dis.a(), dis.b());
-	int n = dis(g);
-	PrintDebug("Random choice: %d", n);
-	std::advance(start, n);
-	return start;
-}
 
-template<typename Iter>
-Iter choose_random(Iter start, Iter end) {
-	
-		
-	return choose_random(start, end, gen);
-}
+
 int chooseSet() {
-	if (shuffleSetOrder) {
-		int set_num = *choose_random(setIDs.begin(), setIDs.end());
+	int set_num;
+	if (shuffleSets) {
+		PrintDebug("SHUFFLING ON");
 		if (!selectWithoutReplacement) {
 			PrintDebug("Selecting With Replacement");
+			std::shuffle(setIDs.begin(), setIDs.end(), gen);
+			set_num = setIDs.front();
+			
 		}
 		else {
 			PrintDebug("Selecting Without Replacement");
+			if (setIDs.size() == setIDsCopy.size()) {
+				std::shuffle(setIDs.begin(), setIDs.end(), gen);
+			}
+			set_num = setIDs.front();
 			setIDs.erase(std::remove(setIDs.begin(), setIDs.end(), set_num), setIDs.end());
 			if (setIDs.size() == 0) {
 				PrintDebug("List Exhausted, Reloading");
 				setIDs = setIDsCopy;
 			}
 		}
-
+		std::ostringstream out;
+		out << "RANDOM SET CHOSEN: " << set_num;
+		
+		//SendTimedDebugMessage(out.str(), 120);
 		return set_num;
 	}
 	else {
@@ -151,10 +149,13 @@ void __declspec(naked)hook1024() {
 				PrintDebug("NOT A HUNTING STAGE");
 				break;
 			}
-
+			PrintDebug("LOADING FOR LEVEL %d", CurrentLevel);
 			lastLevel = CurrentLevel;
 		}
-		PrintDebug("CURRENT LEVEL: %d");
+		else {
+			PrintDebug("STAYING ON LEVEL %d", CurrentLevel);
+		}
+		
 		setIDsCopy = setIDs;
 	}
 	if (MissionNum == 0 && setIDs.size() > 0) {
@@ -222,15 +223,11 @@ void __declspec(naked)hookSecurityHallSafeColor() {
 	}
 	if (!hasSetSafes) {
 		CurrentSafeColor = safeColorIndex;
-		for (char i = 0; i < 3; i++) {
-			PrintDebug("%d %d", i, SafeSwitchFlags[i]);
-			if (i == safeColorIndex) {
-				SafeSwitchFlags[i] &= 1;
-			}
-			else {
-				if (SafeSwitchFlags[i] & 1) {
-					SafeSwitchFlags[i] -= 1;
-				}
+		int onSwitchPtr = safeSwitchArrayBase + safeColorIndex;
+		if (safeColorIndex > 0) {
+			__asm {
+				and byte ptr [safeSwitchArrayBase], 0xFE
+				or byte ptr [onSwitchPtr], 1
 			}
 		}
 		hasSetSafes = true;
@@ -243,7 +240,8 @@ void __declspec(naked)hookSecurityHallSafeColor() {
 	}
 }
 
-void initHooks(bool replacementSetting, bool useMin) {
+void initHooks(bool shuffle, bool replacementSetting, bool useMin) {
+	shuffleSets = shuffle;
 	useMinSets = useMin;
 	Hook((void*)hookEntryPt, hook1024, 6);
 	Hook((void*)resultsEntryPt, hookResultsScreen, 5);
