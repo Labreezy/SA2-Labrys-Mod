@@ -52,7 +52,7 @@ extern "C" {
 
 		if (DEATH_STRAT_MODE) {
 			PrintDebug("DEATH STRAT MODE ON");
-			std::string pieceGroup = config->getString("PostDeathSettings", "group");
+			std::string pieceGroup = config->getString("PostDeathSettings", "group", "AllP2");
 			initPostDeathHook(pieceGroup);
 		}
 		else if (minsets) {

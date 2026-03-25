@@ -145,19 +145,16 @@ void initPostDeathHook(std::string piecegroup)
 	std::copy(eggQuartersYellowPingIds, eggQuartersYellowPingIds + 7, eggQuartersAllPingIds);
 	std::copy(eggQuartersGreenPingIds, eggQuartersGreenPingIds + 4, eggQuartersAllPingIds + 7);
 	eggQuartersAllPingIds[11] = 0x105; //First Place You Landed
-
-		if (piecegroup == "AllP2") {
-			group_arr = deathChamberAllPingIds;
-			group_arr_len = 9;
-		}
-		else if (piecegroup == "RedYellowP2") {
-			group_arr = deathChamberYRPingIds;
-			group_arr_len = 3;
-		}
-		else if (piecegroup == "YellowP2") {
-			group_arr = deathChamberYellowPingIds;
-			group_arr_len = 5;
-		}
+	group_arr = deathChamberAllPingIds;
+	group_arr_len = 9;
+	if (piecegroup == "RedYellowP2") {
+		group_arr = deathChamberYRPingIds;
+		group_arr_len = 3;
+	}
+	if (piecegroup == "YellowP2") {
+		group_arr = deathChamberYellowPingIds;
+		group_arr_len = 5;
+	}
 
 	
 
