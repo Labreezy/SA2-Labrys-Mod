@@ -9,6 +9,8 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include "FunctionHook.h"
+#include "MemAccess.h"
 
 int hookEntryPt = 0x7380BF;
 int resultsEntryPt = 0x43e80e;
@@ -39,7 +41,7 @@ std::vector<int> min_sets_eq = { 0,1,2,3,5,6,7,15,17,23,26,30,32,38,52,59,72,79,
 std::vector	<int> min_sets_sh = { 0,1,2,4,5,10,15,16,18,20,22,24,25,28,32,35,41,43,50,53,64,87,95,126,200,225,321,555,1002,553,660,466,247,632,233,987,678,951,1004,757,157,819,557 };
 std::vector<int> min_sets_ms = { 0,1,2,3,87,739,6,7,14,16,293,29,70,119,122,128,137,149,278,560,327,951,714,152,461,227,687,725,253,317,679,712,683,74,1019,112 };
 
-
+FunctionHook<void, SearchEmeraldsGameManager*> hGenerateSet((intptr_t)0x7380A0);
 int current_id = -1;
 
 bool isSetFileModified(std::string set_fpath) {
@@ -92,7 +94,63 @@ int chooseSet() {
 		return set_num;
 	}
 }
+
+void generateSet_impl(SearchEmeraldsGameManager* emeraldManager) {
+	if (useMinSets) {
+		if (lastLevel != CurrentLevel) {
+			switch (CurrentLevel) {
+			case LevelIDs_WildCanyon:
+				setIDs = min_sets_wc;
+				break;
+			case LevelIDs_PumpkinHill:
+				setIDs = min_sets_ph;
+				break;
+			case LevelIDs_AquaticMine:
+				setIDs = min_sets_am;
+				break;
+			case LevelIDs_DeathChamber:
+				setIDs = min_sets_dc;
+				break;
+			case LevelIDs_MeteorHerd:
+				setIDs = min_sets_mh;
+				break;
+			case LevelIDs_DryLagoon:
+				setIDs = min_sets_dl;
+				break;
+			case LevelIDs_EggQuarters:
+				setIDs = min_sets_eq;
+				break;
+			case LevelIDs_SecurityHall:
+				setIDs = min_sets_sh;
+				break;
+			case LevelIDs_MadSpace:
+				setIDs = min_sets_ms;
+				break;
+			default:
+				PrintDebug("NOT A HUNTING STAGE");
+				break;
+			}
+			PrintDebug("LOADING FOR LEVEL %d", CurrentLevel);
+			lastLevel = CurrentLevel;
+		}
+		else {
+			PrintDebug("STAYING ON LEVEL %d", CurrentLevel);
+		}
+	}
+	if (setIDsCopy.size() > 0 || setIDs.size() > 0) {
+		current_id = chooseSet();
+	}
+	else {
+		current_id = FrameCount % 1024;
+	}
+	PrintDebug("Choosing set %d", current_id);
+	for (int i = 0; i < current_id; i++) {
+		sa2_rand();
+	}
+	FrameCount = current_id;
 	
+	hGenerateSet.Original(emeraldManager);
+}
 
 double getIGT() {
 	double igt = TimerMinutes * 60.0 + TimerSeconds;
@@ -160,7 +218,7 @@ void __declspec(naked)hook1024() {
 	}
 	if (MissionNum == 0 && setIDs.size() > 0) {
 		current_id = chooseSet();
-		
+		PrintDebug("current_id: %d", current_id);
 		__asm {
 			popad
 			mov edi, current_id
@@ -170,11 +228,13 @@ void __declspec(naked)hook1024() {
 	else {	
 		__asm {
 			mov current_id, edi
+			and edi, 0x3FF
 			jmp hookExit
 		}
 	}
 	__asm {
 		popad
+		and edi, 0x3FF
 		jmp hookExit
 	}
 }
@@ -244,6 +304,8 @@ void initHooks(bool shuffle, bool replacementSetting, bool useMin) {
 	shuffleSets = shuffle;
 	useMinSets = useMin;
 	Hook((void*)hookEntryPt, hook1024, 6);
+	//and edi, 0x7FFFFFF, expands viable range past 1024
+	WriteData<unsigned char,6>((void*)0x7380C5, { 0x81, 0xE7, 0xFF, 0xFF, 0xFF, 0x7F }); 
 	Hook((void*)resultsEntryPt, hookResultsScreen, 5);
 	//Hook((void*)hookSafeColorPt, hookSecurityHallSafeColor, 6);
 	gen = std::mt19937(rd());

@@ -9,10 +9,10 @@ std::string settxtpath;
 std::string csvdbpath;
 
 std::ofstream csvdb_f;
-bool shuffleSetOrder = false;
+static bool shuffleSetOrder = false;
 HelperFunctions HelperFunctionsGlobal;
-bool DEATH_STRAT_MODE = false;
-bool minsets = false;
+static bool DEATH_STRAT_MODE = false;
+static bool minsets = false;
 extern "C" {
 	__declspec(dllexport) void __cdecl Init(const char* path, const HelperFunctions& helperFunctions) {
 		HelperFunctionsGlobal = helperFunctions;
