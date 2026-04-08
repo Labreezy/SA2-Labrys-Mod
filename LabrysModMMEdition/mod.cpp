@@ -90,11 +90,11 @@ extern "C" {
 		
 
 	}
-	__declspec(dllexport) void __cdecl OnInput() {
-		if (Controllers[0].on & Buttons_L && Controllers[0].on & Buttons_R) {
-			if (Controllers[0].press & Buttons_Up) {
-				SendTimedDebugMessage("OUPUT TIME DATA TO DB (WIP)", 120);
-			}
+	__declspec(dllexport) void __cdecl OnControl() {
+		if ((Controllers[0].press & Buttons_Y) && GameState == GameStates_Pause) {
+			setCopySetFlag(true);
+			SendTimedDebugMessage("RELOADING LAST SET", 120);
+			PrintDebug("REPLAY FLAG SET");
 		}
 	}
 

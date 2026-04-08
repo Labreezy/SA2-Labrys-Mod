@@ -15,16 +15,20 @@
 int hookEntryPt = 0x7380BF;
 int resultsEntryPt = 0x43e80e;
 DWORD hookExit = hookEntryPt + 6;
+DWORD hookExitFar = 0x7380DA;
 DWORD resultsSkipExit = resultsEntryPt + 5;
 DWORD noScoreExit = 0x451535;
 DWORD run_start_const = 0x174aff9;
 DWORD hookSafeColorPt = 0x635449;
 DWORD hookSafeColorExit = hookSafeColorPt + 6;
+DWORD hookPostSetGen = 0x739A5A;
+DWORD hookPostSetGenExit = hookPostSetGen + 6;
 int curr_set_idx = 0;
 bool hasSetSafes = false;
 int lastLevel = -1;
 bool useMinSets = false;
 bool shuffleSets = false;
+bool copySetFlag = false;
 std::filesystem::file_time_type last_setf_write;
 std::vector<int> setIDs;
 std::vector<int> setIDsCopy;
@@ -43,6 +47,8 @@ std::vector<int> min_sets_ms = { 0,1,2,3,87,739,6,7,14,16,293,29,70,119,122,128,
 
 FunctionHook<void, SearchEmeraldsGameManager*> hGenerateSet((intptr_t)0x7380A0);
 int current_id = -1;
+SearchEmeraldsGameManager lastEmeraldManager;
+
 
 bool isSetFileModified(std::string set_fpath) {
 
@@ -54,6 +60,10 @@ bool isSetFileModified(std::string set_fpath) {
 	return false;
 }
 
+unsigned long getRandSeed() {
+	PartPtidData* ptddata = __getptd();
+	return ptddata->randSeed;
+}
 
 
 int chooseSet() {
@@ -93,63 +103,6 @@ int chooseSet() {
 
 		return set_num;
 	}
-}
-
-void generateSet_impl(SearchEmeraldsGameManager* emeraldManager) {
-	if (useMinSets) {
-		if (lastLevel != CurrentLevel) {
-			switch (CurrentLevel) {
-			case LevelIDs_WildCanyon:
-				setIDs = min_sets_wc;
-				break;
-			case LevelIDs_PumpkinHill:
-				setIDs = min_sets_ph;
-				break;
-			case LevelIDs_AquaticMine:
-				setIDs = min_sets_am;
-				break;
-			case LevelIDs_DeathChamber:
-				setIDs = min_sets_dc;
-				break;
-			case LevelIDs_MeteorHerd:
-				setIDs = min_sets_mh;
-				break;
-			case LevelIDs_DryLagoon:
-				setIDs = min_sets_dl;
-				break;
-			case LevelIDs_EggQuarters:
-				setIDs = min_sets_eq;
-				break;
-			case LevelIDs_SecurityHall:
-				setIDs = min_sets_sh;
-				break;
-			case LevelIDs_MadSpace:
-				setIDs = min_sets_ms;
-				break;
-			default:
-				PrintDebug("NOT A HUNTING STAGE");
-				break;
-			}
-			PrintDebug("LOADING FOR LEVEL %d", CurrentLevel);
-			lastLevel = CurrentLevel;
-		}
-		else {
-			PrintDebug("STAYING ON LEVEL %d", CurrentLevel);
-		}
-	}
-	if (setIDsCopy.size() > 0 || setIDs.size() > 0) {
-		current_id = chooseSet();
-	}
-	else {
-		current_id = FrameCount % 1024;
-	}
-	PrintDebug("Choosing set %d", current_id);
-	for (int i = 0; i < current_id; i++) {
-		sa2_rand();
-	}
-	FrameCount = current_id;
-	
-	hGenerateSet.Original(emeraldManager);
 }
 
 double getIGT() {
@@ -216,27 +169,57 @@ void __declspec(naked)hook1024() {
 		
 		setIDsCopy = setIDs;
 	}
-	if (MissionNum == 0 && setIDs.size() > 0) {
-		current_id = chooseSet();
-		PrintDebug("current_id: %d", current_id);
-		__asm {
-			popad
-			mov edi, current_id
-			jmp hookExit
+	if (lastSeed == 0 || TimesRestartedOrDied == 0) {
+		if (MissionNum == 0 && setIDs.size() > 0) {
+				current_id = chooseSet();
+				PrintDebug("current_id: %d", current_id);
+			__asm {
+				mov edi, current_id
+			}
 		}
+		else {	
+			__asm {
+				and edi, 0x3FF
+				mov current_id, edi
+			}
+		}
+			__asm {
+				and edi, 0x7FFFFFFF
+				RNG_LOOP:
+				call sa2_rand
+				dec edi
+				test edi, edi
+				jg RNG_LOOP
+			}
+		}
+
+__asm {
+	popad
+	jmp hookExitFar
 	}
-	else {	
-		__asm {
-			mov current_id, edi
-			and edi, 0x3FF
-			jmp hookExit
-		}
+}
+
+
+void __declspec(naked)hookPost1024() {
+	__asm {
+		pushad
+	}
+	if (copySetFlag) {
+		memcpy(EmeraldManager, &lastEmeraldManager, sizeof(SearchEmeraldsGameManager));
+		setCopySetFlag(false);
+	}
+	else if (EmeraldManager->emeralds_spawned == 3) {
+		memcpy(&lastEmeraldManager, EmeraldManager, sizeof(SearchEmeraldsGameManager));
 	}
 	__asm {
 		popad
-		and edi, 0x3FF
-		jmp hookExit
+		add esp, 4
+		mov byte ptr [edi],4
+		jmp hookPostSetGenExit
 	}
+}
+void setCopySetFlag(bool val) {
+	copySetFlag = val;
 }
 
 void __declspec(naked)hookResultsScreen() {
@@ -253,6 +236,7 @@ void __declspec(naked)hookResultsScreen() {
 			curr_set_idx = 0;
 		}
 		lastLevel = CurrentLevel;
+		lastSeed = 0;
 		__asm {
 			
 			popad
@@ -266,6 +250,7 @@ void __declspec(naked)hookResultsScreen() {
 	if (curr_set_idx >= setIDs.size()) {
 		curr_set_idx = 0;
 	}
+	lastSeed = 0;
 	__asm {
 		
 		popad
@@ -304,9 +289,8 @@ void initHooks(bool shuffle, bool replacementSetting, bool useMin) {
 	shuffleSets = shuffle;
 	useMinSets = useMin;
 	Hook((void*)hookEntryPt, hook1024, 6);
-	//and edi, 0x7FFFFFF, expands viable range past 1024
-	WriteData<unsigned char,6>((void*)0x7380C5, { 0x81, 0xE7, 0xFF, 0xFF, 0xFF, 0x7F }); 
 	Hook((void*)resultsEntryPt, hookResultsScreen, 5);
+	Hook((void*)hookPostSetGen, hookPost1024, 6);
 	//Hook((void*)hookSafeColorPt, hookSecurityHallSafeColor, 6);
 	gen = std::mt19937(rd());
 	selectWithoutReplacement = replacementSetting;

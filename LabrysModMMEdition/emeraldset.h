@@ -67,7 +67,11 @@ struct SearchEmeraldsGameManager {
     undefined field25_0x73;
 };
 
-
+struct PartPtidData {
+    byte pad0[0x14];
+    unsigned long randSeed;
+    byte pad18[0x3A0];
+};
 
 
 DataPointer(SearchEmeraldsGameManager*, EmeraldManager, 0x1AF014C);
@@ -76,9 +80,14 @@ DataPointer(byte*, GoToNextStage, 0x1A558A4);
 DataPointer(char, CurrentSafeColor, 0x1AEDFD4);
 DataArray(char, SafeSwitchFlags, 0x1DE9461, 3);
 
+FunctionPointer(PartPtidData*, __getptd, (), 0x7AC4D3);
+
+static unsigned long lastSeed = 0;
+
 void LoadSetsFromFile(std::string fpath);
 void initHooks(bool shuffle, bool withReplacement, bool useMin);
 void initResultsSkipHook();
+void setCopySetFlag(bool val);
 void StartTimeDB(std::string fpath);
 static std::ofstream* ildb_outf = NULL;
 static char safeColorIndex;
