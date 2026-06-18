@@ -42,51 +42,21 @@
     <ClCompile Include="TextConv.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="setdb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="magic.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SA2Enums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SA2Functions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SA2ModInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SA2ModLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SA2Structs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SA2Variables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MemAccess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ninja.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="njdef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="emeraldset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="asmutils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="debug-text.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mod.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="timeutil.h">
@@ -105,6 +75,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mod.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="setdb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

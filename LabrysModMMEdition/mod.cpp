@@ -3,16 +3,19 @@
 #include "emeraldset.h"
 #include "pieceutils.h"
 #include "debug-text.h"
+#include <filesystem>
 #include "./IniFile.hpp"
 
 std::string settxtpath;
 std::string csvdbpath;
 
-std::ofstream csvdb_f;
+
 bool shuffleSetOrder = false;
 HelperFunctions HelperFunctionsGlobal;
 bool DEATH_STRAT_MODE = false;
 bool minsets = false;
+
+
 extern "C" {
 	__declspec(dllexport) void __cdecl Init(const char* path, const HelperFunctions& helperFunctions) {
 		HelperFunctionsGlobal = helperFunctions;
@@ -32,10 +35,12 @@ extern "C" {
 		else {
 			safeColorIndex = 0;
 		}
-
+		std::string pbsound = config->getString("MiscSettings", "sfx", "none");
+		PrintDebug(pbsound.c_str());
+		
 		if (!DEATH_STRAT_MODE && !minsets) {
-			selectWithoutReplacement = config->getBool("ShuffleSettings", "replacement", true);
-			if (selectWithoutReplacement) {
+			selectWithReplacement = config->getBool("ShuffleSettings", "replacement", true);
+			if (selectWithReplacement) {
 				PrintDebug("Selecting with replacement");
 			}
 			else {
@@ -44,10 +49,10 @@ extern "C" {
 
 			
 			PrintDebug("GOT ANOTHER THING");
-			//std::string dbfolder = modpath + "\\db";
-			//CreateDirectoryA(dbfolder.c_str(), NULL); //getlasterror will return ERR_ALREADY_EXISTS if exists so we don't quite care
+			std::string dbfolder = modpath + "\\db";
+			CreateDirectoryA(dbfolder.c_str(), NULL); //getlasterror will return ERR_ALREADY_EXISTS if exists so we don't quite care
 			settxtpath = modpath + "\\sets.txt"; //make ini setting later
-			//csvdbpath = dbfolder + "\\set_times.csv";
+			csvdbpath = dbfolder + "\\set_times.csv";
 		}
 
 		if (DEATH_STRAT_MODE) {
@@ -57,15 +62,16 @@ extern "C" {
 		}
 		else if (minsets) {
 			PrintDebug("MINIMUM SET MODE ON");
-			initHooks(shuffleSetOrder, selectWithoutReplacement, minsets);
+			initHooks(shuffleSetOrder, selectWithReplacement, minsets);
 		}
 		else {
 			PrintDebug("LOADING FROM FILE");
 			LoadSetsFromFile(settxtpath);
+			loadEntryDB(csvdbpath, pbsound);
 
 			//StartTimeDB(csvdbpath); //label by date, somehow
 
-			initHooks(shuffleSetOrder, selectWithoutReplacement, minsets);
+			initHooks(shuffleSetOrder, selectWithReplacement, minsets);
 		}
 		Init_DebugText();
 

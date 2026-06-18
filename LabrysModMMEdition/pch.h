@@ -11,4 +11,6 @@
 #include "SA2ModLoader.h"
 #include "mod.h"
 #include "Inifile.hpp"
+#include "setdb.h"
+
 #endif //PCH_H

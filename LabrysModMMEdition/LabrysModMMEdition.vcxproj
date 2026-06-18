@@ -84,14 +84,14 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)sa2-mod-loader\mod-loader-common\ModLoaderCommon</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)sa2-mod-loader\SA2ModLoader\include;$(SolutionDir)sa2-mod-loader\mod-loader-common\ModLoaderCommon</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>$(SolutionDir)\bin\ModLoaderCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)\bin\ModLoaderCommon.lib;%(AdditionalDependencies);winmm.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y $(SolutionDir)$(Configuration)\* "D:\SteamLibrary\steamapps\common\Sonic Adventure 2\mods\sa2-labmod"</Command>
@@ -107,8 +107,8 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)sa2-mod-loader\mod-loader-common\ModLoaderCommon</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)sa2-mod-loader\SA2ModLoader\include;$(SolutionDir)sa2-mod-loader\mod-loader-common\ModLoaderCommon</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -119,7 +119,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary />
       <AdditionalOptions>/NOIMPLIB  /NOEXP %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);winmm.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y $(SolutionDir)$(Configuration)\*l "D:\SteamLibrary\steamapps\common\Sonic Adventure 2\mods\sa2-labmod"</Command>
@@ -174,27 +174,19 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="pieceutils.cpp" />
+    <ClCompile Include="setdb.cpp" />
     <ClCompile Include="TextConv.cpp" />
     <ClCompile Include="timeutil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="asmutils.h" />
     <ClInclude Include="debug-text.h" />
     <ClInclude Include="emeraldset.h" />
     <ClInclude Include="IniFile.hpp" />
-    <ClInclude Include="magic.h" />
     <ClInclude Include="MemAccess.h" />
     <ClInclude Include="mod.h" />
-    <ClInclude Include="ninja.h" />
-    <ClInclude Include="njdef.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="pieceutils.h" />
-    <ClInclude Include="SA2Enums.h" />
-    <ClInclude Include="SA2Functions.h" />
-    <ClInclude Include="SA2ModInfo.h" />
-    <ClInclude Include="SA2ModLoader.h" />
-    <ClInclude Include="SA2Structs.h" />
-    <ClInclude Include="SA2Variables.h" />
+    <ClInclude Include="setdb.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TextConv.hpp" />
     <ClInclude Include="timeutil.h" />

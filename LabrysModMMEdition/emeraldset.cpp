@@ -10,6 +10,10 @@
 #include <sstream>
 #include <filesystem>
 
+#include "FunctionHook.h"
+
+
+static FunctionHook<void, SearchEmeraldsGameManager*> hGenerateSet((intptr_t)0x7380A0);
 int hookEntryPt = 0x7380BF;
 int resultsEntryPt = 0x43e80e;
 DWORD hookExit = hookEntryPt + 6;
@@ -29,6 +33,7 @@ std::vector<int> setIDsCopy;
 static std::random_device rd;
 static std::mt19937 gen;
 int safeSwitchArrayBase = 0x1DE9461;
+int safeSwitchPtr = safeSwitchArrayBase;
 std::vector<int> min_sets_wc = { 174,785,258,783,959,774,563,395,413,70,87,183,842,809,722,341,798,1003,827,473,992,334,255,972,485,399,477,970,703,372,813,691,659,414,442,262,111,365,979 };
 std::vector<int> min_sets_ph = { 0,2,3,4,5,369,10,11,12,14,211,34,56,241,60,69,74,85,118,153,176,202,343,294,348,603,610,929,633,273,410,716,524,383,803,966,154,276,708 };
 std::vector<int> min_sets_am = { 248,1,2,3,5,6,7,12,17,902,22,23,222,40,41,47,51,52,78,106,115,131,154,179,213,492,563,408,589,428,168,439,546,254,1000,740,189 };
@@ -58,7 +63,7 @@ int chooseSet() {
 	int set_num;
 	if (shuffleSets) {
 		PrintDebug("SHUFFLING ON");
-		if (!selectWithoutReplacement) {
+		if (selectWithReplacement) {
 			PrintDebug("Selecting With Replacement");
 			std::shuffle(setIDs.begin(), setIDs.end(), gen);
 			set_num = setIDs.front();
@@ -93,6 +98,61 @@ int chooseSet() {
 	}
 }
 	
+void genSetHook_h(SearchEmeraldsGameManager* manager) {
+	PrintDebug("HOOK CALLED");
+	if (MissionNum == 0 && useMinSets) {
+		if (lastLevel != CurrentLevel) {
+			switch (CurrentLevel) {
+			case LevelIDs_WildCanyon:
+				setIDs = min_sets_wc;
+				break;
+			case LevelIDs_PumpkinHill:
+				setIDs = min_sets_ph;
+				break;
+			case LevelIDs_AquaticMine:
+				setIDs = min_sets_am;
+				break;
+			case LevelIDs_DeathChamber:
+				setIDs = min_sets_dc;
+				break;
+			case LevelIDs_MeteorHerd:
+				setIDs = min_sets_mh;
+				break;
+			case LevelIDs_DryLagoon:
+				setIDs = min_sets_dl;
+				break;
+			case LevelIDs_EggQuarters:
+				setIDs = min_sets_eq;
+				break;
+			case LevelIDs_SecurityHall:
+				setIDs = min_sets_sh;
+				break;
+			case LevelIDs_MadSpace:
+				setIDs = min_sets_ms;
+				break;
+			default:
+				PrintDebug("NOT A HUNTING STAGE");
+				break;
+			}
+			PrintDebug("LOADING FOR LEVEL %d", CurrentLevel);
+			lastLevel = CurrentLevel;
+		}
+		else {
+			PrintDebug("STAYING ON LEVEL %d", CurrentLevel);
+		}
+
+		setIDsCopy = setIDs;
+	}
+	if (MissionNum == 0 && setIDs.size() > 0) {
+		current_id = chooseSet();
+		for (int i = 0; i < current_id; i++) {
+			sa2_rand();
+		}
+		FrameCount -= FrameCount % 1024;
+	}
+	PrintDebug("HOOK DONE");
+	hGenerateSet.Original(manager);
+}
 
 double getIGT() {
 	double igt = TimerMinutes * 60.0 + TimerSeconds;
@@ -104,6 +164,8 @@ double getIGT() {
 void logCurrentSet(int setID) {
 	double igt = getIGT();
 	PrintDebug("%d,%d,%f", CurrentLevel, setID, igt);
+	saveTimeToDB(CurrentLevel, setID, igt);
+
 }
 
 int chooseSetFromMinLists() {
@@ -188,6 +250,9 @@ void __declspec(naked)hookResultsScreen() {
 		if (TimesRestartedOrDied == 0) {
 			logCurrentSet(current_id);
 		}
+		if (CurrentLevel == LevelIDs_SecurityHall) {
+			hasSetSafes = false;
+		}
 		curr_set_idx++;
 		if (curr_set_idx >= setIDs.size()) {
 			curr_set_idx = 0;
@@ -221,16 +286,18 @@ void __declspec(naked)hookSecurityHallSafeColor() {
 	__asm {
 		pushad
 	}
+	
 	if (!hasSetSafes) {
+		PrintDebug("SAFE HOOK CALLED");
 		CurrentSafeColor = safeColorIndex;
-		int onSwitchPtr = safeSwitchArrayBase + safeColorIndex;
+		safeSwitchPtr = safeSwitchArrayBase + safeColorIndex;
 		if (safeColorIndex > 0) {
 			__asm {
-				and byte ptr [safeSwitchArrayBase], 0xFE
-				or byte ptr [onSwitchPtr], 1
+				and byte ptr[safeSwitchArrayBase], 0xFE
+				or byte ptr[safeSwitchPtr], 1
 			}
 		}
-		hasSetSafes = true;
+		
 	}
 	__asm {
 		popad
@@ -244,10 +311,11 @@ void initHooks(bool shuffle, bool replacementSetting, bool useMin) {
 	shuffleSets = shuffle;
 	useMinSets = useMin;
 	Hook((void*)hookEntryPt, hook1024, 6);
+	//hGenerateSet.Hook(genSetHook_h);
 	Hook((void*)resultsEntryPt, hookResultsScreen, 5);
 	//Hook((void*)hookSafeColorPt, hookSecurityHallSafeColor, 6);
 	gen = std::mt19937(rd());
-	selectWithoutReplacement = replacementSetting;
+	selectWithReplacement = replacementSetting;
 }
 
 
